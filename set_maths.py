@@ -74,6 +74,10 @@ def set_maths():
 	
     outfile = open('new_sets.txt', 'w')
     m = np.multiply(x, y)
+    for element in m:
+		# 1. if not prime, remove from array
+		# 2. fill remaining positions with random primes, primes from an array used, or repeat resulting elements.
+		# 3. do the same for each operator
     outfile.write(str(m) + '\n')
     d = np.divide(y, x)
     outfile.write(str(d) + '\n')
