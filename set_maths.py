@@ -47,11 +47,11 @@ sets = {
 	
     'set20': np.array([17393, 17401, 17417, 17419, 17431, 17443, 17449, 17467, 17471, 17477, 17483, 17489, 17491, 17497, 17509, 17519, 17539, 17551, 17569, 17573, 17579, 17581, 17597, 17599, 17609, 17623, 17627, 17657, 17659, 17669, 17681, 17683, 17707, 17713, 17729, 17737, 17747, 17749, 17761, 17783, 17789, 17791, 17807, 17827, 17837, 17839, 17851, 17863, 17881, 17891, 17903, 17909, 17911, 17921, 17923, 17929, 17939, 17957, 17959, 17971, 17977, 17981, 17987, 17989, 18013, 18041, 18043, 18047, 18049, 18059, 18061, 18077, 18089, 18097, 18119, 18121, 18127, 18131, 18133, 18143, 18149, 18169, 18181, 18191, 18199, 18211, 18217, 18223, 18229, 18233, 18251, 18253, 18257, 18269, 18287, 18289, 18301, 18307, 18311, 18313]),
 }
-	# need to make set21 a complete array
+	# need to make set21 a complete Mersenne array
 	# 'set21' : np.array([((8508301*217016603) - 1), ((7*66772401) + 1), (7*(2**18233956)) + 1, ((168451**219375200) + 1), 	((919444**1048576) + 1), ((1059094**1048576) + 1), ((2**20996011) - 1), (2**24036583 - 1), (2**25964951 - 1), (2**30402457 - 1), ((10223*(2**31172165)) + 1), ((2**32582657) - 1), ((2**37156667) - 1), ((2**42643801) - 1), ((2**43112609) - 1), ((2**57885161) - 1), ((2**74207281) - 1), ((2**77232917) - 1), ((2**82589933) - 1)])}
 
 def set_maths():
-    set_keys = list(sets.keys())
+    # set_keys = list(sets.keys())
     # print(f"options: {', '.join(set_keys)}")
     
     while True:
@@ -74,10 +74,26 @@ def set_maths():
 	
     outfile = open('new_sets.txt', 'w')
     m = np.multiply(x, y)
+    '''   1.
     for element in m:
-		# 1. if not prime, remove from array
-		# 2. fill remaining positions with random primes, primes from an array used, or repeat resulting elements.
+		def is_prime(n):
+			if n <= 1:
+				return False
+			for i in range(2, int(n**0.5) + 1):
+				if n % i == 0:
+					return False
+			return True
+
+		def remove(m):
+		    primes = [num for num in m if is_prime(num)]
+		    return primes
+		
+		m_filtered = remove(m)
+		
+		'''
+		# 2. m.extend([3] * (100 - len(m))
 		# 3. do the same for each operator
+		
     outfile.write(str(m) + '\n')
     d = np.divide(y, x)
     outfile.write(str(d) + '\n')
@@ -101,3 +117,9 @@ def set_maths():
     plt.show()
     
 set_maths()
+
+
+
+
+
+
