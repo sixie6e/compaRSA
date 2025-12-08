@@ -74,27 +74,24 @@ def set_maths():
 	
     outfile = open('new_sets.txt', 'w')
     m = np.multiply(x, y)
-    '''   1.
+    
     for element in m:
-		def is_prime(n):
-			if n <= 1:
-				return False
-			for i in range(2, int(n**0.5) + 1):
-				if n % i == 0:
-					return False
-			return True
+        def is_prime(n):
+            if n <= 1:
+                return False
+            for i in range(2, int(n**0.5) + 1):
+                if n % i == 0:
+                    return False
+            return True
 
-		def remove(m):
-		    primes = [num for num in m if is_prime(num)]
-		    return primes
+        def remove(m):
+            primes = [num for num in m if is_prime(num)]
+            return primes
+          
+        m_filtered = remove(m)
+        # m = m_filtered.extend([3] * (100 - len(m)))
 		
-		m_filtered = remove(m)
-		
-		'''
-		# 2. m.extend([3] * (100 - len(m))
-		# 3. do the same for each operator
-		
-    outfile.write(str(m) + '\n')
+    outfile.write(str(m_filtered) + '\n')
     d = np.divide(y, x)
     outfile.write(str(d) + '\n')
     a = np.add(x, y)
@@ -113,13 +110,8 @@ def set_maths():
     plt.ylabel(f'({j} - {i})')
     plt.grid(True, linestyle='--', alpha=0.6)
     plt.legend()
-    plt.savefig("plt.png")
+    filename = f'{i}{j}.png'
+    plt.savefig(filename)
     plt.show()
     
 set_maths()
-
-
-
-
-
-
