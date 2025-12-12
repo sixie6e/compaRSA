@@ -69,12 +69,6 @@ def set_maths():
             
     set_x = sets[i]
     set_y = sets[j]
-    
-    if i == 'set22' or j == 'set22':
-        print("Using Mersenne exponents only for plotting stability.")
-        set_x = sets['set21']
-        set_y = sets['set21']
-        
     min_len = min(len(set_x), len(set_y))
     x = set_x[:min_len]
     y = set_y[:min_len]
@@ -82,7 +76,6 @@ def set_maths():
     outfile = open('new_sets.txt', 'w')
     m = np.multiply(x, y)
     outfile.write(f'(m): {m}\n')
-    outfile.write(f'(m_filtered): {m_filtered}\n')
     d = np.divide(x, y)
     d1 = np.divide(y, x)
     outfile.write(f'(x/y): {d}\n')
@@ -101,15 +94,16 @@ def set_maths():
     mod1 = np.remainder(y, x)
     outfile.write(f'(x%y): {mod}\n')
     outfile.write(f'(y%x): {mod1}\n')
-    m_list = m.tolist() 
+    m_list = m.tolist()
     m_filtered = np.array([n for n in m_list if isprime(n)])
+    outfile.write(f'(m_filtered): {m_filtered}\n')
     outfile.close()
 
     plt.figure(figsize=(10, 6))
     plt.scatter(a, s, label=f'{i} vs {j}', color='darkblue', s=10)
     plt.title('Set Maths')
     plt.xlabel(f'({i} + {j})')
-    plt.ylabel(f'({y} - {x})')
+    plt.ylabel(f'({i} - {j})')
     plt.grid(True, linestyle='--', alpha=0.6)
     plt.legend()
     filename = f'{i}{j}.png'
