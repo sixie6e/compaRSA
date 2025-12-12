@@ -1,12 +1,10 @@
-#
-# sixie6@distherapy
-#
 import numpy as np
 import matplotlib.pyplot as plt
+from sympy import isprime
 
 mers = np.array([3, 5, 7, 13, 17, 19, 31, 61, 89, 107, 127, 521, 607, 1279, 2203, 2281, 3217, 4253, 4423, 9689, 9941, 11213, 19937, 21701, 23209, 44497, 86243, 110503, 132049, 216091, 756839, 859433, 1257787, 1398269, 2976221, 3021377, 6972593, 13466917, 20996011, 24036583, 25964951, 30402457, 32582657, 37156667, 42643801, 43112609, 57885161, 74207281, 77232917, 82589933])
 
-merseval = [2**p - 1 for p in mers]
+merseval = [2**p - 1 for p in mers] 
 
 sets = {
     'set0': np.array([2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541]),
@@ -57,7 +55,6 @@ sets = {
 	}
 
 def set_maths():
-    # set_keys = list(sets.keys())    
     while True:
         i = input('First set number: ').strip()
         if i in sets:
@@ -72,62 +69,51 @@ def set_maths():
             
     set_x = sets[i]
     set_y = sets[j]
+    
+    if i == 'set22' or j == 'set22':
+        print("Using Mersenne exponents only for plotting stability.")
+        set_x = sets['set21']
+        set_y = sets['set21']
+        
     min_len = min(len(set_x), len(set_y))
     x = set_x[:min_len]
     y = set_y[:min_len]
 	
     outfile = open('new_sets.txt', 'w')
     m = np.multiply(x, y)
-    m1 = m
-    
-    for n in m:
-        def is_prime(n):
-            if n <= 1:
-                return False
-            for i in range(2, int(n**0.5) + 1):
-                if n % i == 0:
-                    return False
-            return True
-        '''
-        def remove(m):
-            primes = [num for num in m if is_prime(num)]
-            return primes
-          
-        m_filtered = remove(m)
-        m = m_filtered.extend([3] * (100 - len(m)))
-        '''  
-    outfile.write(str(m) + '\n')
-    outfile.write(str(m1) + '\n')
+    outfile.write(f'(m): {m}\n')
+    outfile.write(f'(m_filtered): {m_filtered}\n')
     d = np.divide(x, y)
     d1 = np.divide(y, x)
-    outfile.write(str(d) + '\n')
-    outfile.write(str(d1) + '\n')
+    outfile.write(f'(x/y): {d}\n')
+    outfile.write(f'(y/x): {d1}\n')
     a = np.add(x, y)
-    a1 = a
-    outfile.write(str(a) + '\n')
-    outfile.write(str(a1) + '\n')
+    outfile.write(f'(x+y): {a}\n')
     s = np.subtract(x, y)
     s1 = np.subtract(y, x)
-    outfile.write(str(s) + '\n')
-    outfile.write(str(s1) + '\n')
+    outfile.write(f'(x-y): {s}\n')
+    outfile.write(f'(y-x): {s1}\n')
     f = np.floor_divide(x, y)
     f1 = np.floor_divide(y, x)
-    outfile.write(str(f) + '\n')
-    outfile.write(str(f1) + '\n')   
+    outfile.write(f'(x//y): {f}\n')
+    outfile.write(f'(y//x): {f1}\n')
     mod = np.remainder(x, y)
     mod1 = np.remainder(y, x)
-    outfile.write(str(mod) + '\n')
-    outfile.write(str(mod1) + '\n')
-    
+    outfile.write(f'(x%y): {mod}\n')
+    outfile.write(f'(y%x): {mod1}\n')
+    m_list = m.tolist() 
+    m_filtered = np.array([n for n in m_list if isprime(n)])
+    outfile.close()
+
     plt.figure(figsize=(10, 6))
     plt.scatter(a, s, label=f'{i} vs {j}', color='darkblue', s=10)
     plt.title('Set Maths')
     plt.xlabel(f'({i} + {j})')
-    plt.ylabel(f'({j} - {i})')
+    plt.ylabel(f'({y} - {x})')
     plt.grid(True, linestyle='--', alpha=0.6)
     plt.legend()
     filename = f'{i}{j}.png'
     plt.savefig(filename)
     plt.show()
-    
+
 set_maths()
