@@ -68,7 +68,7 @@ def set_maths():
         print(f"Error: '{j}' is invalid.")
             
     set_x = sets[i]
-    set_y = sets[j]
+    set_y = sets[j]   
     min_len = min(len(set_x), len(set_y))
     x = set_x[:min_len]
     y = set_y[:min_len]
@@ -103,7 +103,7 @@ def set_maths():
     plt.scatter(a, s, label=f'{i} vs {j}', color='darkblue', s=10)
     plt.title('Set Maths')
     plt.xlabel(f'({i} + {j})')
-    plt.ylabel(f'({i} - {j})')
+    plt.ylabel(f'({j} - {i})')
     plt.grid(True, linestyle='--', alpha=0.6)
     plt.legend()
     filename = f'{i}{j}.png'
