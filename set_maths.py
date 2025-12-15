@@ -119,9 +119,12 @@ def set_maths():
 
     plt.figure(figsize=(10, 6))
     plt.scatter(a, s, label=f'{i} vs {j}', color='darkblue', s=10)
+    plt.scatter(m, s, label=f'{i} vs {j}', color='green', s=10)
+    plt.scatter(s, f, label=f'{i} vs {j}', color='red', s=10)
+    plt.scatter(m, f, label=f'{i} vs {j}', color='yellow', s=10)
     plt.title('Set Maths')
-    plt.xlabel(f'({i} + {j})')
-    plt.ylabel(f'({j} - {i})')
+    plt.xlabel(f'({i} v. {j})')
+    plt.ylabel(f'({j} v. {i})')
     plt.grid(True, linestyle='--', alpha=0.6)
     plt.legend()
     filename = f'{i}{j}.png'
