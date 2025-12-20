@@ -3,13 +3,9 @@ import matplotlib.pyplot as plt
 from sympy import isprime
 import pickle
 
-mers = np.array([3, 5, 7, 13, 17, 19, 31, 61, 89, 107, 127, 521, 607, 1279, 2203, 2281, 3217, 4253, 4423, 9689, 9941, 11213, 19937, 21701, 23209, 44497, 86243, 110503, 132049, 216091, 756839, 859433, 1257787, 1398269, 2976221, 3021377, 6972593, 13466917, 20996011, 24036583, 25964951, 30402457, 32582657, 37156667, 42643801, 43112609, 57885161, 74207281, 77232917, 82589933])
-
-merseval = [2**p - 1 for p in mers] 
-
 sets = {
     'set0': np.array([2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541]),
-	
+    
     'set1': np.array([547, 557, 563, 569, 571, 577, 587, 593, 599, 601, 607, 613, 617, 619, 631, 641, 643, 647, 653, 659, 661, 673, 677, 683, 691, 701, 709, 719, 727, 733, 739, 743, 751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997, 1009, 1013, 1019, 1021, 1031, 1033, 1039, 1049, 1051, 1061, 1063, 1069, 1087, 1091, 1093, 1097, 1103, 1109, 1117, 1123, 1129, 1151, 1153, 1163, 1171, 1181, 1187, 1193, 1201, 1213, 1217, 1223]),
 	
     'set2': np.array([1229, 1231, 1237, 1249, 1259, 1277, 1279, 1283, 1289, 1291, 1297, 1301, 1303, 1307, 1319, 1321, 1327, 1361, 1367, 1373, 1381, 1399, 1409, 1423, 1427, 1429, 1433, 1439, 1447, 1451, 1453, 1459, 1471, 1481, 1483, 1487, 1489, 1493, 1499, 1511, 1523, 1531, 1543, 1549, 1553, 1559, 1567, 1571, 1579, 1583, 1597, 1601, 1607, 1609, 1613, 1619, 1621, 1627, 1637, 1657, 1663, 1667, 1669, 1693, 1697, 1699, 1709, 1721, 1723, 1733, 1741, 1747, 1753, 1759, 1777, 1783, 1787, 1789, 1801, 1811, 1823, 1831, 1847, 1861, 1867, 1871, 1873, 1877, 1879, 1889, 1901, 1907, 1913, 1931, 1933, 1949, 1951, 1973, 1979, 1987]),
@@ -47,95 +43,90 @@ sets = {
     'set18': np.array([15413, 15427, 15439, 15443, 15451, 15461, 15467, 15473, 15493, 15497, 15511, 15527, 15541, 15551, 15559, 15569, 15581, 15583, 15601, 15607, 15619, 15629, 15641, 15643, 15647, 15649, 15661, 15667, 15671, 15679, 15683, 15727, 15731, 15733, 15737, 15739, 15749, 15761, 15767, 15773, 15787, 15791, 15797, 15803, 15809, 15817, 15823, 15859, 15877, 15881, 15887, 15889, 15901, 15907, 15913, 15919, 15923, 15937, 15959, 15971, 15973, 15991, 16001, 16007, 16033, 16057, 16061, 16063, 16067, 16069, 16073, 16087, 16091, 16097, 16103, 16111, 16127, 16139, 16141, 16183, 16187, 16189, 16193, 16217, 16223, 16229, 16231, 16249, 16253, 16267, 16273, 16301, 16319, 16333, 16339, 16349, 16361, 16363, 16369, 16381]),
 	
     'set19': np.array([16411, 16417, 16421, 16427, 16433, 16447, 16451, 16453, 16477, 16481, 16487, 16493, 16519, 16529, 16547, 16553, 16561, 16567, 16573, 16603, 16607, 16619, 16631, 16633, 16649, 16651, 16657, 16661, 16673, 16691, 16693, 16699, 16703, 16729, 16741, 16747, 16759, 16763, 16787, 16811, 16823, 16829, 16831, 16843, 16871, 16879, 16883, 16889, 16901, 16903, 16921, 16927, 16931, 16937, 16943, 16963, 16979, 16981, 16987, 16993, 17011, 17021, 17027, 17029, 17033, 17041, 17047, 17053, 17077, 17093, 17099, 17107, 17117, 17123, 17137, 17159, 17167, 17183, 17189, 17191, 17203, 17207, 17209, 17231, 17239, 17257, 17291, 17293, 17299, 17317, 17321, 17327, 17333, 17341, 17351, 17359, 17377, 17383, 17387, 17389]),
-	
-    'set20': np.array([17393, 17401, 17417, 17419, 17431, 17443, 17449, 17467, 17471, 17477, 17483, 17489, 17491, 17497, 17509, 17519, 17539, 17551, 17569, 17573, 17579, 17581, 17597, 17599, 17609, 17623, 17627, 17657, 17659, 17669, 17681, 17683, 17707, 17713, 17729, 17737, 17747, 17749, 17761, 17783, 17789, 17791, 17807, 17827, 17837, 17839, 17851, 17863, 17881, 17891, 17903, 17909, 17911, 17921, 17923, 17929, 17939, 17957, 17959, 17971, 17977, 17981, 17987, 17989, 18013, 18041, 18043, 18047, 18049, 18059, 18061, 18077, 18089, 18097, 18119, 18121, 18127, 18131, 18133, 18143, 18149, 18169, 18181, 18191, 18199, 18211, 18217, 18223, 18229, 18233, 18251, 18253, 18257, 18269, 18287, 18289, 18301, 18307, 18311, 18313]),
+    'set21': np.array([3, 5, 7, 13, 17, 19, 31, 61, 89, 107, 127, 521, 607, 1279, 2203, 2281, 3217, 4253, 4423, 9689, 9941, 11213, 19937, 21701, 23209, 44497, 86243, 110503, 132049, 216091, 756839, 859433, 1257787, 1398269, 2976221, 3021377, 6972593, 13466917, 20996011, 24036583, 25964951, 30402457, 32582657, 37156667, 42643801, 43112609, 57885161, 74207281, 77232917, 82589933]),
+    'set22': [2**p - 1 for p in [3, 5, 7, 13, 17, 19, 31, 61, 89, 107, 127, 521, 607, 1279, 2203, 2281, 3217, 4253, 4423, 9689, 9941, 11213, 19937, 21701, 23209, 44497, 86243, 110503, 132049, 216091, 756839, 859433, 1257787, 1398269, 2976221, 3021377, 6972593, 13466917, 20996011, 24036583, 25964951, 30402457, 32582657, 37156667, 42643801, 43112609, 57885161, 74207281, 77232917, 82589933]]
+}
 
-	'set21' : mers,
-	
-	'set22' : merseval	
-	}
+next_set = 23
 
 def set_maths():
-    while True:
-        i = input('First set number: ').strip()
-        if i in sets:
-            break
-        print(f"Error: '{i}' is invalid.")
-
-    while True:
-        j = input('Second set number: ').strip()
-        if j in sets:
-            break
-        print(f"Error: '{j}' is invalid.")
-            
-    set_x = sets[i]
-    set_y = sets[j]   
-    min_len = min(len(set_x), len(set_y))
-    x = set_x[:min_len]
-    y = set_y[:min_len]
+    global next_set
     
-    m = np.multiply(x, y)
-    m_filtered = np.array([n for n in m if isprime(n)])
-    d = np.divide(x, y)
-    d1 = np.divide(x, y).astype(int)
-    # d1 = np.divide(y, x)
-    # outfile.write(f'(y/x): {d1}\n')
-    a = np.add(x, y)
-    a_filtered = np.array([n for n in a if isprime(n)])
-    s = np.subtract(x, y)
-    s1 = np.subtract(y, x)
-    s_filtered = np.array([n for n in s if isprime(n)])
-    s1_filtered = np.array([n for n in s1 if isprime(n)])
-    f = np.floor_divide(x, y)
-    f1 = np.floor_divide(y, x)
-    f_filtered = np.array([n for n in f if isprime(n)])
-    f1_filtered = np.array([n for n in f1 if isprime(n)])
-    mod = np.remainder(x, y)
-    mod1 = np.remainder(y, x)
-    mod_filtered = np.array([n for n in mod if isprime(n)])
-    mod1_filtered = np.array([n for n in mod1 if isprime(n)])
-	
-    set_dictionary = {
-    'm': m,
-    'd': d,
-    'd1' : d1,
-    'a' : a,
-    'a_filtered' :a_filtered,
-    's' : s,
-    's1' : s1,
-    's_filtered' : s_filtered,
-    's1_filtered' : s1_filtered,
-    'f' : f,
-    'f1' : f1,
-    'f_filtered' : f_filtered,  
-    'f1_filtered' : f1_filtered,
-    'mod' : mod,
-    'mod1' : mod1,
-    'mod_filtered' : mod_filtered,
-    'mod1_filtered' : mod1_filtered
-    }
+    while True:
+        i = input(f'First set number: ').strip()
+        j = input('Second set number: ').strip()
+        
+        if i not in sets or j not in sets:
+            print("Invalid.")
+            continue
 
-    plt.figure(figsize=(10, 6))
-    plt.scatter(a, s, label=f'{i} +,- {j}', color='blue', s=10)
-    plt.scatter(m, a, label=f'{i} +,* {j}', color='green', s=10)
-    plt.scatter(a, f, label=f'{i} +,// {j}', color='red', s=10)
-    plt.scatter(a, mod, label=f'{i} +,% {j}', color='purple', s=10)
-    plt.scatter(m, s, label=f'{i} *,- {j}', color='orange', s=10)
-    plt.scatter(f, m, label=f'{i} *,// {j}', color='yellow', s=10)
-    plt.scatter(m, mod, label=f'{i} *,% {j}', color='black', s=10)
-    plt.scatter(mod, s, label=f'{i} %,- {j}', color='gray', s=10)
-    plt.scatter(mod, f, label=f'{i} %,// {j}', color='magenta', s=10)
-    plt.scatter(s, f, label=f'{i} -,// {j}', color='skyblue', s=10)
-    plt.title('Set Maths')
-    plt.xlabel(f'({i} v. {j})')
-    plt.ylabel(f'({j} v. {i})')
-    plt.grid(True, linestyle='--', alpha=0.6)
-    plt.legend()
-    filename = f'{i}{j}.png'
-    plt.savefig(filename, format='png')
-    plt.show()
-	
-    with open(f'{i}{j}.pkl', 'wb') as f:
-        pickle.dump(set_dictionary, f)
+        max_len_input = input(f'Array length(max {min(len(sets[i]), len(sets[j]))}): ').strip()
+        limit = int(max_len_input) if max_len_input.isdigit() else min(len(sets[i]), len(sets[j]))
+        set_x = sets[i][:limit]
+        set_y = sets[j][:limit]
+        
+        m = np.multiply(set_x, set_y)
+        a = np.add(set_x, set_y)
+        s = np.subtract(set_x, set_y)
+        f = np.floor_divide(set_x, set_y)
+        mod = np.remainder(set_x, set_y)
+        m_filtered = np.array([n for n in m if isprime(int(n))])
+        a_filtered = np.array([n for n in a if isprime(int(n))])
+        s_filtered = np.array([n for n in s if n > 0 and isprime(int(n))])
+        f_filtered = np.array([n for n in f if isprime(int(n))])
+        mod_filtered = np.array([n for n in mod if isprime(int(n))])
 
-set_maths()
+        results = {
+            'm': m, 
+            'a': a, 
+            's': s, 
+            'f': f, 
+            'mod': mod, 
+            'm_filtered': m_filtered, 
+            'a_filtered': a_filtered, 
+            's_filtered': s_filtered, 
+            'f_filtered': f_filtered,
+            'mod_filtered': mod_filtered
+        }
+        
+        print("Options: 1: (a,s), 2: (m,a), 3: (a,f), 4: (a,mod), 5: (m,s), 6: (f,m), 7: (m,mod), 8: (mod,s), 9: (mod,f), 10: (s,f)")
+        order = input("Enter for default: ").strip()
+        plot_map = {
+            '1': (a, s, f'{i} +,- {j}', 'blue'),
+            '2': (m, a, f'{i} +,* {j}', 'green'),
+            '3': (a, f, f'{i} +,// {j}', 'red'),
+            '4': (a, mod, f'{i} +,% {j}', 'purple'),
+            '5': (m, s, f'{i} *,- {j}', 'orange'),
+            '6': (f, m, f'{i} //,* {j}', 'yellow'),
+            '7': (m, mod, f'{i} *,% {j}', 'black'),
+            '8': (mod, s, f'{i} %,- {j}', 'gray'),
+            '9': (mod, f, f'{i} %,// {j}', 'magenta'),
+            '10': (s, f, f'{i} *,// {j}', 'skyblue')
+        }
+        plot_selection = order.split(',') if order else ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+
+        plt.figure(figsize=(10, 6))
+        for choice in plot_selection:
+            if choice in plot_map:
+                x_val, y_val, lbl, clr = plot_map[choice]
+                # adjust plotting len(filtered_sets)
+                p_len = min(len(x_val), len(y_val))
+                plt.scatter(x_val[:p_len], y_val[:p_len], label=lbl, color=clr, s=10)
+        plt.title(f'Set Maths: {i} & {j}')
+        plt.legend()
+        filename = f'{i}{j}.png'
+        plt.savefig(filename, format='png')
+        plt.show()
+
+        save_choice = input(f"\nSave *_filtered as 'set{next_set}'? Choose one or press 'n': ").strip()
+        if save_choice in results:
+            new_key = f'set{next_set}'
+            sets[new_key] = results[save_choice]
+            print(f"Stored {save_choice} as {new_key} (Length: {len(sets[new_key])})")
+            next_set += 1
+
+        if input("\nRun it again? (y/n): ").lower() != 'y':
+            break
+
+if __name__ == "__main__":
+    set_maths()
