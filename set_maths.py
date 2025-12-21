@@ -51,6 +51,7 @@ next_set = 23
 
 def set_maths():
     global next_set
+    global pfile
     
     while True:
         i = input(f'First set number: ').strip()
@@ -91,6 +92,7 @@ def set_maths():
         
         print("Options: 1: (a,s), 2: (m,a), 3: (a,f), 4: (a,mod), 5: (m,s), 6: (f,m), 7: (m,mod), 8: (mod,s), 9: (mod,f), 10: (s,f)")
         order = input("Enter for default: ").strip()
+        
         plot_map = {
             '1': (a, s, f'{i} +,- {j}', 'blue'),
             '2': (m, a, f'{i} +,* {j}', 'green'),
@@ -117,17 +119,18 @@ def set_maths():
         filename = f'{i}{j}.png'
         plt.savefig(filename, format='png')
         plt.show()
-
-        save_choice = input(f"\nSave *_filtered as 'set{next_set}'? Choose one or press 'n': ").strip()
-        if save_choice in results:
+        
+        for z in results:
             new_key = f'set{next_set}'
-            sets[new_key] = results[save_choice]
-            print(f"Stored {save_choice} as {new_key} (Length: {len(sets[new_key])})")
+            sets[new_key] = results[z]
+            print(f"Stored {z} as {new_key} (Length: {len(sets[new_key])})")
             next_set += 1
 
         if input("\nRun it again? (y/n): ").lower() != 'y':
-			with open(f'{i}{j}.pkl', 'wb') as f:
-				pickle.dump(results, f)
+            with open(f'{i}{j}.pkl', 'ab+') as pfile:
+                pickle.dump(results, pfile)
+                pickle.dump(next_set, pfile)
+                pfile.close() 
             break
 
 if __name__ == "__main__":
