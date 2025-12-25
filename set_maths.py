@@ -64,19 +64,21 @@ def set_maths():
         if mode == '2':
             all_keys = list(sets.keys())
             i = random.choice(all_keys)
-            target_len = len(sets[i])
-            same_len_keys = [k for k in all_keys if len(sets[k]) == target_len and k != i]
             
+            target_len = len(sets[i])
+            limit_val = target_len
+            same_len_keys = [k for k in all_keys if len(sets[k]) == target_len and k != i and len(k) != 0]
+     
             if not same_len_keys or target_len == 0:
                 print(f"{next_set} has length 0.")
-                break
-                
             j = random.choice(same_len_keys)
-
+            
             with open('selections_history.txt', 'a+') as log:
                 log.write(f"Selected: {i} and {j} (Length: {target_len})\n")
             print(f"Randomly selected {i} and {j} (Length: {target_len})")
-            limit_val = target_len
+            
+            
+            
         else:
             i = input(f'First set number: ').strip()
             j = input('Second set number: ').strip()
@@ -164,7 +166,7 @@ def set_maths():
                         pickle.dump(results, v)
                     break
             else:
-                print(f'Stored results for {i} and {j}. Next_set: {next_set}')
+                print(f'Stored results for {i} and {j}. Next set index: {next_set}')
 
         except MemoryError:
             try:
