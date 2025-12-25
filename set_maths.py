@@ -55,8 +55,7 @@ limit = 4 * 1024 * 1024 * 1024
 resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
 
 def set_maths():
-    global next_set
-    
+    global next_set    
     mode = input("(1) Manual (2) Auto: ").strip()
     
     while True:
@@ -132,8 +131,12 @@ def set_maths():
                 print("Select order: 1: (a,s), 2: (m,a), 3: (a,f), 4: (a,mod), 5: (m,s), 6: (f,m), 7: (m,mod), 8: (mod,s), 9: (mod,f), 10: (s,f)")
                 order = input("Enter for default: ").strip()
                 plot_selection = order.split(',') if order else ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
-            else:
-                
+                for z in results:
+                    new_key = f'set{next_set}'
+                    sets[new_key] = results[z]
+                    print(f"Stored {z} as {new_key} (Length: {len(sets[new_key])})")
+                    next_set += 1
+            else:                
                 plot_selection = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
                 
             plt.figure(figsize=(10, 6))
@@ -153,7 +156,6 @@ def set_maths():
             for z in results:
                 new_key = f'set{next_set}'
                 sets[new_key] = results[z]
-				print(f"Stored {z} as {new_key} (Length: {len(sets[new_key])})")
                 next_set += 1
 
             if mode == '1':
