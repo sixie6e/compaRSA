@@ -1,84 +1,83 @@
 #include <iostream>
+#include <vector>
 #include <fstream>
-#include <string>
-#include <gmpxx.h>
 #include <csignal>
-#include <sys/stat.h>
+#include <mkl.h>
+#include <omp.h>
 #include <iomanip>
 
-const long p = 136279841;
-const std::string checkpoint_file = "checkpoint.txt";
-const int interval = 1000;
-bool interrupted = false;
-long current_i = 1;
-mpz_class current_s = 4;
+const long P = 136279841;
+const long N = 1L << 28; 
+const std::string CHECKPOINT_FILE = "checkpoint.bin";
 
-void save_progress(long p_val, long iteration, const mpz_class& s) {
-    std::ofstream f(checkpoint_file);
+double* s_data = nullptr;
+long current_iteration = 1;
+
+void save_checkpoint(int signum) {
+    std::cout << "\n[Interrupt] Saving state at iteration " << current_iteration << "..." << std::endl;
+    
+    std::ofstream f(CHECKPOINT_FILE, std::ios::binary);
     if (f.is_open()) {
-        f << p_val << "\n" << iteration << "\n" << s.get_str(16) << std::endl;
+        f.write(reinterpret_cast<char*>(&current_iteration), sizeof(long));
+        f.write(reinterpret_cast<char*>(s_data), N * sizeof(double));
         f.close();
+        std::cout << "State saved to " << CHECKPOINT_FILE << ". Exiting." << std::endl;
     }
-}
-
-void signal_handler(int signum) {
-    std::cout << "\nKeyboard Interrupt." << std::endl;
-    save_progress(p, current_i, current_s);
+    
+    mkl_free(s_data);
     exit(signum);
 }
 
-bool file_exists(const std::string& name) {
-    struct stat buffer;
-    return (stat(name.c_str(), &buffer) == 0);
+void load_checkpoint() {
+    std::ifstream f(CHECKPOINT_FILE, std::ios::binary);
+    if (f.is_open()) {
+        f.read(reinterpret_cast<char*>(&current_iteration), sizeof(long));
+        f.read(reinterpret_cast<char*>(s_data), N * sizeof(double));
+        f.close();
+        std::cout << "Resuming from checkpoint at iteration " << current_iteration << std::endl;
+    } else {
+        std::fill(s_data, s_data + N, 0.0);
+        s_data[0] = 4.0;
+        std::cout << "No checkpoint found. New session started." << std::endl;
+    }
 }
 
 int main() {
-    signal(SIGINT, signal_handler);
-    mpz_class mers = (mpz_class(1) << p) - 1;
-    long start_iteration = 1;
+    std::signal(SIGINT, save_checkpoint);
+    s_data = (double*)mkl_malloc(N * sizeof(double), 64);
+    MKL_Complex16* fft_buffer = (MKL_Complex16*)mkl_malloc(N * sizeof(MKL_Complex16), 64);
+    load_checkpoint();
+    DFTI_DESCRIPTOR_HANDLE handle = NULL;
+    DftiCreateDescriptor(&handle, DFTI_DOUBLE, DFTI_REAL, 1, N);
+    DftiSetValue(handle, DFTI_PLACEMENT, DFTI_NOT_INPLACE);
+    mkl_set_num_threads(omp_get_max_threads());
+    DftiCommitDescriptor(handle);
 
-    if (file_exists(checkpoint_file)) {
-        std::ifstream f(checkpoint_file);
-        long check_p;
-        std::string s_hex;
+    for (; current_iteration < P - 1; ++current_iteration) {
         
-        if (f >> check_p >> start_iteration >> s_hex) {
-            if (check_p == p) {
-                std::cout << "Resuming from iteration " << start_iteration << "..." << std::endl;
-                current_s = mpz_class(s_hex, 16);
-                start_iteration++; 
-            } else {
-                std::cout << "Different checkpoint found.. New session started." << std::endl;
-            }
+        DftiComputeForward(handle, s_data, fft_buffer);
+
+        #pragma omp parallel for
+        for (long j = 0; j < N; j++) {
+            double re = fft_buffer[j].real;
+            double im = fft_buffer[j].imag;
+            fft_buffer[j].real = re*re - im*im;
+            fft_buffer[j].imag = 2*re*im;
         }
-        f.close();
+
+        DftiComputeBackward(handle, fft_buffer, s_data);
+        // normalize_and_reduce(s_data, P); 
+        if (current_iteration % 500 == 0) {
+            double progress = (double)current_iteration / (P - 2) * 100.0;
+            std::cout << "Iteration: " << current_iteration << " | " 
+                      << std::fixed << std::setprecision(2) << progress << "%\r" << std::flush;
+        }
     }
 
-    try {
-        for (current_i = start_iteration; current_i < p - 1; ++current_i) {
-            // llcheck()
-            current_s = (current_s * current_s - 2) % mers;
-
-            if (current_i % interval == 0) {
-                save_progress(p, current_i, current_s);
-                double progress = (double)current_i / (p - 2) * 100.0;
-                std::cout << "Progress: " << current_i << "/" << (p - 2) 
-                          << " (" << std::fixed << std::setprecision(2) << progress << "%)   \r" << std::flush;
-            }
-        }
-
-        bool is_prime = (current_s == 0);
-        std::cout << "\nConclusion: " << (is_prime ? "Prime" : "Composite") << std::endl;
-        
-        if (file_exists(checkpoint_file)) {
-            remove(checkpoint_file.c_str());
-        }
-
-    } catch (const std::bad_alloc& e) {
-        std::cerr << "\nMemory Error." << std::endl;
-        save_progress(p, current_i, current_s);
-        return 1;
-    }
-
+    std::cout << "\nComplete." << std::endl;
+    
+    DftiFreeDescriptor(&handle);
+    mkl_free(s_data);
+    mkl_free(fft_buffer);
     return 0;
 }
