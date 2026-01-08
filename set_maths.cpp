@@ -2,13 +2,15 @@
 #include <vector>
 #include <string>
 #include <map>
-#include <random>
 #include <fstream>
 #include <gmpxx.h> 
 #include <omp.h>
 #include <sys/resource.h>
+#include <algorithm>
 
 using namespace std;
+
+typedef mpz_class BigInt;
 
 // set22 will quickly exceed 64bit int limit.
 typedef mpz_class BigInt;
@@ -23,101 +25,98 @@ bool is_prime(const BigInt& n) {
     return mpz_probab_prime_p(n.get_mpz_t(), 25) > 0;
 }
 
+void save_state() {
+    string filename = "session_state_" + to_string(next_set) + ".bin";
+    ofstream ofs(filename, ios::binary);
+    if (!ofs) return;
 
-// column == set, row == value
+    ofs.write((char*)&next_set, sizeof(next_set));
+    size_t num_sets = sets.size();
+    ofs.write((char*)&num_sets, sizeof(num_sets));
 
-void save_to_csv(const string& filename) {
-    ofstream file(filename);
-
-    if (file.is_open()) {
-        bool first = true;
-        for (auto const& [name, values] : sets) {
-            if (!first) file << ",";
-            file << name;
-            first = false;
-        }
-        file << "\n";
+    for (auto const& [name, values] : sets) {
+        size_t name_len = name.size();
+        ofs.write((char*)&name_len, sizeof(name_len));
+        ofs.write(name.c_str(), name_len);
         
-        size_t max_rows = 0;
-        for (auto const& [name, values] : sets) {
-            max_rows = max(max_rows, values.size());
+        size_t vec_size = values.size();
+        ofs.write((char*)&vec_size, sizeof(vec_size));
+        for (const auto& val : values) {
+            string s = val.get_str();
+            size_t s_len = s.size();
+            ofs.write((char*)&s_len, sizeof(s_len));
+            ofs.write(s.c_str(), s_len);
         }
-
-        for (size_t r = 0; r < max_rows; ++r) {
-            first = true;
-            for (auto const& [name, values] : sets) {
-                if (!first) file << ",";
-                
-                if (r < values.size()) {
-                    file << values[r].get_str();
-                }
-                first = false;
-            }
-            file << "\n";
-        }
-        file.close();
-        cout << "Results saved to " << filename << endl;
-    } else {
-        cerr << "Error: Could not open file." << endl;
     }
+    cout << "State saved to " << filename << endl;
 }
 
-void process_sets(const string& id_i, const string& id_j, int limit_val) {
-    const vector<BigInt>& set_x = sets[id_i];
-    const vector<BigInt>& set_y = sets[id_j];
-    vector<BigInt> m_res, a_res, s_res, f_res, mod_res;
+void load_state(int index) {
+    string filename = "session_state_" + to_string(index) + ".bin";
+    ifstream ifs(filename, ios::binary);
+    if (!ifs) return;
 
-    #pragma omp parallel
-    {
-        vector<BigInt> local_m, local_a, local_s, local_f, local_mod;
+    ifs.read((char*)&next_set, sizeof(next_set));
+    size_t num_sets;
+    ifs.read((char*)&num_sets, sizeof(num_sets));
 
-        #pragma omp for nowait
-        for (int k = 0; k < limit_val; ++k) {
-            BigInt x = set_x[k];
-            BigInt y = set_y[k];
-          
-            BigInt m = x * y;
-            if (is_prime(m)) local_m.push_back(m);
-            
-            BigInt a = x + y;
-            if (is_prime(a)) local_a.push_back(a);
-            
-            BigInt s = x - y;
-            if (s > 0 && is_prime(s)) local_s.push_back(s);
-          
-            if (y != 0) {
-                BigInt f = x / y;
-                if (is_prime(f)) local_f.push_back(f);
-                BigInt mod = x % y;
-                if (is_prime(mod)) local_mod.push_back(mod);
-            }
+    for (size_t i = 0; i < num_sets; ++i) {
+        size_t name_len;
+        ifs.read((char*)&name_len, sizeof(name_len));
+        string name(name_len, ' ');
+        ifs.read(&name[0], name_len);
+
+        size_t vec_size;
+        ifs.read((char*)&vec_size, sizeof(vec_size));
+        vector<BigInt> values;
+        for (size_t j = 0; j < vec_size; ++j) {
+            size_t s_len;
+            ifs.read((char*)&s_len, sizeof(s_len));
+            string s(s_len, ' ');
+            ifs.read(&s[0], s_len);
+            values.push_back(BigInt(s));
         }
-        
-        #pragma omp critical
-        {
-            m_res.insert(m_res.end(), local_m.begin(), local_m.end());
-            a_res.insert(a_res.end(), local_a.begin(), local_a.end());
-            s_res.insert(s_res.end(), local_s.begin(), local_s.end());
-            f_res.insert(f_res.end(), local_f.begin(), local_f.end());
-            mod_res.insert(mod_res.end(), local_mod.begin(), local_mod.end());
+        sets[name] = values;
+    }
+    cout << "Resumed from " << filename << endl;
+}
+
+void process_pair(string i, string j, int limit, bool interactive) {
+    vector<BigInt> results;
+    size_t range_limit = min({sets[i].size(), sets[j].size(), (size_t)limit});
+
+    #pragma omp parallel for
+    for (size_t k = 0; k < range_limit; ++k) {
+        BigInt a = sets[i][k];
+        BigInt b = sets[j][k];
+        BigInt val = (a * b) + (a - b); // Python logic: (a*b) + (a-b)
+
+        if (is_prime(val)) {
+            #pragma omp critical
+            results.push_back(val);
         }
     }
-  
-    if (!m_res.empty()) sets["set" + to_string(next_set++)] = m_res;
-    if (!a_res.empty()) sets["set" + to_string(next_set++)] = a_res;
-    if (!s_res.empty()) sets["set" + to_string(next_set++)] = s_res;
-    if (!f_res.empty()) sets["set" + to_string(next_set++)] = f_res;
-    if (!mod_res.empty()) sets["set" + to_string(next_set++)] = mod_res;
-    cout << "Processed. Next set index is: " << next_set << endl;
+
+    if (!results.empty()) {
+        string new_set_name = "set" + to_string(next_set);
+        sets[new_set_name] = results;
+        cout << "\nFound " << results.size() << " primes for " << i << " and " << j;
+        cout << ". Stored as " << new_set_name << endl;
+
+        next_set++;
+    } else {
+        cout << "\nNo primes found for " << i << " and " << j << ". Skipping set." << endl;
+        next_set++;
+    }
 }
 
 int main() {
-    struct rlimit mem_limit;
-    mem_limit.rlim_cur = 4ULL * 1024 * 1024 * 1024;
-    mem_limit.rlim_max = 4ULL * 1024 * 1024 * 1024;
-    setrlimit(RLIMIT_AS, &mem_limit);
+    struct rlimit rl;
+    rl.rlim_cur = 8ULL * 1024 * 1024 * 1024;
+    rl.rlim_max = 8ULL * 1024 * 1024 * 1024;
+    setrlimit(RLIMIT_AS, &rl);
 
-    sets["set0"] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541};
+        sets["set0"] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541};
     
     sets["set1"] = {547, 557, 563, 569, 571, 577, 587, 593, 599, 601, 607, 613, 617, 619, 631, 641, 643, 647, 653, 659, 661, 673, 677, 683, 691, 701, 709, 719, 727, 733, 739, 743, 751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997, 1009, 1013, 1019, 1021, 1031, 1033, 1039, 1049, 1051, 1061, 1063, 1069, 1087, 1091, 1093, 1097, 1103, 1109, 1117, 1123, 1129, 1151, 1153, 1163, 1171, 1181, 1187, 1193, 1201, 1213, 1217, 1223};
     
@@ -162,19 +161,35 @@ int main() {
     sets["set21"] = {2, 3, 5, 7, 13, 17, 19, 31, 61, 89, 107, 127, 521, 607, 1279, 2203, 2281, 3217, 4253, 4423, 9689, 9941, 11213};
     sets["set22"] = {BigInt("44497"), BigInt("86243"), BigInt("110503"), BigInt("132049"), BigInt("216091")};
 
-    string i, j;
-    cout << "First set: ";
-    cin >> i;
-    cout << "Second set: ";
-    cin >> j;
+    cout << "(1) Manual (2) Auto: ";
+    string mode;
+    cin >> mode;
 
-    if (sets.count(i) && sets.count(j)) {
-        int limit_val = min(sets[i].size(), sets[j].size());
-        process_sets(i, j, limit_val);
-        save_to_csv("results.csv");
+    if (mode == "1") {
+        while (true) {
+            string i, j;
+            int limit;
+            cout << "First set: "; cin >> i;
+            cout << "Second set: "; cin >> j;
+            cout << "Set length: "; cin >> limit;
+
+            process_pair(i, j, limit, true);
+
+            cout << "Run it again? (y/n): ";
+            char choice; cin >> choice;
+            if (choice != 'y') break;
+        }
     } else {
-        cout << "Invalid sets." << endl;
+        vector<string> keys;
+        for (auto const& [name, _] : sets) keys.push_back(name);
+        
+        for (size_t i_idx = 0; i_idx < keys.size(); ++i_idx) {
+            for (size_t j_idx = i_idx + 1; j_idx < keys.size(); ++j_idx) {
+                process_pair(keys[i_idx], keys[j_idx], 1000000, false);
+            }
+        }
     }
 
+    save_state();
     return 0;
 }
