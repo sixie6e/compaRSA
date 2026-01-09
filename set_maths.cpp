@@ -139,27 +139,36 @@ void initialize_base_sets() {
 }
 
 void process_pair(string i, string j, int limit) {
-    if (stop_requested) return;
+    if (sets.find(i) == sets.end() || sets.find(j) == sets.end()) return;
 
+    const auto& set_i = sets[i];
+    const auto& set_j = sets[j];
     vector<BigInt> results;
-    size_t range_limit = min({sets[i].size(), sets[j].size(), (size_t)limit});
+
+    size_t n = min({(size_t)limit, set_i.size(), set_j.size()});
 
     #pragma omp parallel for
-    for (size_t k = 0; k < range_limit; ++k) {
-        if (stop_requested) continue; 
+    for (size_t k = 0; k < n; ++k) {
+        BigInt a = set_i[k];
+        BigInt b = set_j[k];
 
-        BigInt a = sets[i][k];
-        BigInt b = sets[j][k];
-        BigInt val = (a * b) + (a - b);
-
-        if (is_prime(val)) {
+        BigInt val1 = (a * b) + (a - b);
+        if (is_prime(val1)) {
             #pragma omp critical
-            results.push_back(val);
+            results.push_back(val1);
+        }
+
+        if (a != b) {
+            BigInt val2 = (a * b) + (b - a);
+            if (is_prime(val2)) {
+                #pragma omp critical
+                results.push_back(val2);
+            }
         }
     }
 
     if (!results.empty()) {
-        string new_set_name = "set" + to_string(next_set);
+        string new_set_name = "set" + to_string(next_set++);
         sets[new_set_name] = results;
         cout << "Found " << results.size() << " primes for " << i << " and " << j;
         cout << ". Stored as " << new_set_name << endl;
@@ -168,7 +177,6 @@ void process_pair(string i, string j, int limit) {
         next_set++;
     }
 }
-
 void save_to_csv(const string& filename) {
     ofstream file(filename);
     if (!file.is_open()) return;
