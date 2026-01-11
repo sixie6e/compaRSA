@@ -10,8 +10,8 @@ Stores the filtered arrays.
 
 Plots the filtered arrays.
 
-
-
 Manual mode: You decide. Slow with full control.
 
 Auto mode: Computer decides. Rapid with no control.
+
+The bin and csv files get massive, make sure to have adequate storage.
