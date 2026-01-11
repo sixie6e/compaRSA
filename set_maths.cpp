@@ -263,6 +263,12 @@ int main() {
     
     cout << "\nExiting." << endl;
     save_state();
-    save_to_csv("cpp_export.csv");    
-    return 0;
+    cout << "(1) Export to CSV (2) Exit";
+    string exp;
+    cin >> exp;
+    if (exp == "1") {
+        save_to_csv("cpp_export.csv");    
+    } else {
+        return 0;
+    }
 }
