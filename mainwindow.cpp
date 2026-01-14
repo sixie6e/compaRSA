@@ -111,7 +111,7 @@ void MainWindow::on_runButton_clicked() {
 
 void MainWindow::on_stopButton_clicked() {
     stop_requested = true;
-    emit statusLog("Stop requested by user...");
+    emit statusLog("[Keyboard Interrupt.]");
 }
 
 void MainWindow::initialize_base_sets() {
@@ -164,3 +164,35 @@ void MainWindow::initialize_base_sets() {
 
     emit statusLog("Base sets initialized.");
 }
+
+void MainWindow::on_actionSave_Session_triggered()
+{
+    std::string filename = "session_state_" + std::to_string(next_set) + ".bin";
+        std::ofstream ofs(filename, std::ios::binary);
+        if (!ofs) return;
+
+        ofs.write((char*)&next_set, sizeof(next_set));
+        size_t num_sets = sets.size();
+        ofs.write((char*)&num_sets, sizeof(num_sets));
+
+        for (auto const& [name, values] : sets) {
+            size_t name_len = name.size();
+            ofs.write((char*)&name_len, sizeof(name_len));
+            ofs.write(name.c_str(), name_len);
+
+            size_t vec_size = values.size();
+            ofs.write((char*)&vec_size, sizeof(vec_size));
+            for (const auto& val : values) {
+                std::string s = val.get_str();
+                size_t s_len = s.size();
+                ofs.write((char*)&s_len, sizeof(s_len));
+                ofs.write(s.c_str(), s_len);
+            }
+        }
+}
+
+void MainWindow::on_actionExport_Session_triggered()
+{
+    
+}
+
