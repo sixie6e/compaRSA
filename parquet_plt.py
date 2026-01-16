@@ -2,9 +2,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 def cpp_plt(filename):
-    df = pd.read_csv(filename)
+    df = pd.read_parquet(filename, engine="pyarrow")
     plt.figure(figsize=(10, 6))
-    
+   
     for column in df.columns:
         data = pd.to_numeric(df[column].dropna())
         plt.plot(data, label=column, marker='o', linestyle='none', markersize=2)
@@ -18,4 +18,4 @@ def cpp_plt(filename):
     plt.show()
 
 if __name__ == "__main__":
-    cpp_plt("cpp_export.csv")
+    cpp_plt("cpp_export.parquet")
