@@ -1,11 +1,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#include <QObject>
 #include <QMainWindow>
-#include <gmpxx.h>
 #include <map>
 #include <vector>
 #include <string>
 #include <atomic>
+#include <gmpxx.h>
 
 typedef mpz_class BigInt;
 
@@ -20,12 +21,12 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-signals:
+Q_SIGNALS:
     void progressUpdated(int value);
     void statusLog(QString msg);
     void calculationFinished();
 
-private slots:
+private Q_SLOTS:
     void on_runButton_clicked();
     void on_stopButton_clicked();
     void updateProgressBar(int value);
