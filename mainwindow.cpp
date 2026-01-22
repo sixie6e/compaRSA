@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
 #include <QtConcurrent>
 #include <fstream>
 #include <arrow/api.h>
@@ -168,8 +169,7 @@ void MainWindow::initialize_base_sets() {
     Q_EMIT statusLog("Base sets initialized.");
 }
 
-void MainWindow::on_actionSave_Session_triggered()
-{
+void MainWindow::on_actionSave_Session_triggered() {
     std::string filename = "session_state_" + std::to_string(next_set) + ".bin";
         std::ofstream ofs(filename, std::ios::binary);
         if (!ofs) return;
@@ -195,8 +195,7 @@ void MainWindow::on_actionSave_Session_triggered()
     Q_EMIT statusLog("Saved .bin file as last_set + 1.");
 }
 
-void MainWindow::on_actionExport_Session_triggered()
-{
+void MainWindow::on_actionExport_Session_triggered() {
     std::vector<std::string> keys;
     for (auto const& [name, _] : sets) keys.push_back(name);
     std::sort(keys.begin(), keys.end(), [](const std::string& a, const std::string& b) {
@@ -249,9 +248,8 @@ void MainWindow::on_actionExport_Session_triggered()
     if (status.ok()) Q_EMIT statusLog(".parquet saved.");
 }
 
-void MainWindow::on_actionLoad_Session_triggered()
-{
-    std::string file_to_load = "*.bin";
+void MainWindow::on_actionLoad_Session_triggered() {
+    std::string file_to_load = "session_state_41555.bin"; //
     std::ifstream ifs(file_to_load, std::ios::binary);
     if (!ifs) {
         Q_EMIT statusLog("Error: Could not find file.");
@@ -280,27 +278,24 @@ void MainWindow::on_actionLoad_Session_triggered()
         }
         sets[name] = values;
     }
-    Q_EMIT statusLog("Resumed from {file_to_load}");
+    Q_EMIT statusLog("Resumed from file.");
 }
 
 
-void MainWindow::on_actionExit_triggered()
-{
+void MainWindow::on_actionExit_triggered() {
     exit(0);
 }
 
 
-void MainWindow::on_actionAbout_triggered()
-{
+void MainWindow::on_actionAbout_triggered() {
     Q_EMIT statusLog("[github.com/sixie6e]\n[brentelisens.substack.com]\n[distherapy.altervista.org]\n[instagram.com/sixie6e]");
 }
 
-void MainWindow::on_actionPlot_triggered()
-{
+
+void MainWindow::on_actionPlot_triggered() {
     QString command("python3");
         QStringList params;
         params << "parquet_plt.py";
         QProcess *process = new QProcess(this);
         process->startDetached(command, params, "/home/sixie6e/theDirector/");
 }
-
