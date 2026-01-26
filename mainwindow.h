@@ -37,6 +37,7 @@ private Q_SLOTS:
     void on_actionLoad_Session_triggered();
     void on_actionExit_triggered();
     void on_actionAbout_triggered();
+    void on_actionPlot_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -48,6 +49,7 @@ private:
     void process_pair(std::string i, std::string j, int limit);
     void runAutoMode(int u_limit);
     void save_state();
+    double get_ram_usage();
 };
 
 #endif // MAINWINDOW_H

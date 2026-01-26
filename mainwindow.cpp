@@ -1,7 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "setofp.h"
 
+#include <QFileDialog>
+#include <QString>
 #include <QtConcurrent>
 #include <fstream>
 #include <arrow/api.h>
@@ -85,17 +86,50 @@ void MainWindow::runAutoMode(int limit) {
         keys.push_back(name);
     }
 
-    int total_pairs = (keys.size() * (keys.size() - 1)) / 2;
+    int total_pairs = (keys.size() > 1) ? (keys.size() * (keys.size() - 1)) / 2 : 0;
     int processed = 0;
 
     for (size_t i = 0; i < keys.size() && !stop_requested; ++i) {
         for (size_t j = i + 1; j < keys.size() && !stop_requested; ++j) {
-            process_pair(keys[i], keys[j], limit); // Use the UI limit
+
+            if (get_ram_usage() > 80.0) {
+                Q_EMIT statusLog("!!! CRITICAL RAM USAGE (>80%) - Emergency Stop & Save !!!");
+                stop_requested = true;
+                on_actionSave_Session_triggered();
+                break;
+            }
+
+            // Perform the comparison
+            process_pair(keys[i], keys[j], limit);
+
             processed++;
-            Q_EMIT progressUpdated((processed * 100) / total_pairs);
+            if (total_pairs > 0) {
+                Q_EMIT progressUpdated((processed * 100) / total_pairs);
+            }
         }
     }
+
     Q_EMIT calculationFinished();
+}
+
+double MainWindow::get_ram_usage() {
+    std::ifstream meminfo("/proc/meminfo");
+    if (!meminfo.is_open()) return 0.0;
+
+    std::string line;
+    long total = 0;
+    long available = 0;
+
+    while (std::getline(meminfo, line)) {
+        if (line.compare(0, 8, "MemTotal") == 0) {
+            sscanf(line.c_str(), "MemTotal: %ld kB", &total);
+        } else if (line.compare(0, 12, "MemAvailable") == 0) {
+            sscanf(line.c_str(), "MemAvailable: %ld kB", &available);
+        }
+    }
+
+    if (total <= 0) return 0.0;
+    return 100.0 * (1.0 - ((double)available / (double)total));
 }
 
 void MainWindow::on_runButton_clicked() {
@@ -104,8 +138,6 @@ void MainWindow::on_runButton_clicked() {
     ui->progressBar->setValue(0);
     int u_limit = ui->setLength->text().toInt();
     if (u_limit <= 0) u_limit = 100;
-    initialize_base_sets();
-
     if (ui->radioAuto->isChecked()) {
         (void)QtConcurrent::run([this, u_limit]() {
             this->runAutoMode(u_limit);
@@ -231,11 +263,22 @@ void MainWindow::on_actionExport_Session_triggered() {
 }
 
 void MainWindow::on_actionLoad_Session_triggered() {
-    std::string file_to_load = "session_state_41555.bin";
-    std::ifstream ifs(file_to_load, std::ios::binary);
+    QString fileName = QFileDialog::getOpenFileName(
+        this,
+        tr("Open Session File"),
+        "",
+        tr("Binary Files (*.bin);;All Files (*)")
+    );
+
+    if (fileName.isEmpty()) {
+        return; 
+    }
+
+    std::ifstream ifs(fileName.toStdString(), std::ios::binary);
+    
     if (!ifs) {
-        Q_EMIT statusLog("Error: Could not find file.");
-        exit(1);
+        Q_EMIT statusLog("Error: Could not open the selected file.");
+        return; 
     }
 
     ifs.read((char*)&next_set, sizeof(next_set));
@@ -277,8 +320,7 @@ void MainWindow::on_actionPlot_triggered() {
     QString command("python3");
         QStringList params;
         params << "parquet_plt.py";
-        QProcess *process = new QProcess(this);
-        process->startDetached(command, params, "/home/sixie6e/theDirector/");
+        QProcess::startDetached(command, params, "");
 }
 
 
