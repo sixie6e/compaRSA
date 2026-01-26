@@ -8,7 +8,6 @@ Auto mode: Computer decides. Rapid with no control.\
 The bin and parquet files get massive, make sure to have adequate storage.
 
 Requirements: libarrow-dev, libparquet-dev, pyarrow23, parquet, qt6-base-dev, pandas, matplotlib\
-Ubuntu/Debian bases distros:
 
 sudo apt update\
 sudo apt install -y -V ca-certificates lsb-release wget\
