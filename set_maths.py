@@ -9,7 +9,7 @@ import sys
 import os
 
 sets = {
-    'set0': np.array([1, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541]),
+    'set0': np.array([3, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541]),
     
     'set1': np.array([547, 557, 563, 569, 571, 577, 587, 593, 599, 601, 607, 613, 617, 619, 631, 641, 643, 647, 653, 659, 661, 673, 677, 683, 691, 701, 709, 719, 727, 733, 739, 743, 751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997, 1009, 1013, 1019, 1021, 1031, 1033, 1039, 1049, 1051, 1061, 1063, 1069, 1087, 1091, 1093, 1097, 1103, 1109, 1117, 1123, 1129, 1151, 1153, 1163, 1171, 1181, 1187, 1193, 1201, 1213, 1217, 1223]),
     
@@ -127,30 +127,30 @@ def set_maths():
         
         try:
             m = np.multiply(set_x, set_y)
-            a = np.add(set_x, set_y)
-            s = np.subtract(set_x, set_y)
-            f = np.floor_divide(set_x, set_y)
-            mod = np.remainder(set_x, set_y)            
+            a = np.add(set_x, set_y) - 1
+            #s = np.subtract(set_x, set_y)
+            #f = np.floor_divide(set_x, set_y)
+            #mod = np.remainder(set_x, set_y)            
             m_filtered = np.array([n for n in m if isprime(int(n))])
             a_filtered = np.array([n for n in a if isprime(int(n))])
-            s_filtered = np.array([n for n in s if n > 0 and isprime(int(n))])
-            f_filtered = np.array([n for n in f if isprime(int(n))])
-            mod_filtered = np.array([n for n in mod if isprime(int(n))])
+            #s_filtered = np.array([n for n in s if n > 0 and isprime(int(n))])
+            #f_filtered = np.array([n for n in f if isprime(int(n))])
+            #mod_filtered = np.array([n for n in mod if isprime(int(n))])
 
             results = {
                 'm_filtered': m_filtered,
                 'a_filtered': a_filtered, 
-                's_filtered': s_filtered,
-                'f_filtered': f_filtered,
-                'mod_filtered': mod_filtered
+                #'s_filtered': s_filtered,
+                #'f_filtered': f_filtered,
+                #'mod_filtered': mod_filtered
             }
             
             plot_map = {
                 '1': (m_filtered, m_filtered, f'{i} * {j}', 'blue'),
-                '2': (a_filtered, s_filtered, f'{i} + {j}', 'green'),
-                '3': (s_filtered, s_filtered, f'{i} - {j}', 'red'),
-                '4': (f_filtered, f_filtered, f'{i} // {j}', 'purple'),
-                '5': (mod_filtered, mod_filtered, f'{i} % {j}', 'gray'),
+                '2': (a_filtered, a_filtered, f'{i} + {j}', 'green'),
+                #'3': (s_filtered, s_filtered, f'{i} - {j}', 'red'),
+                #'4': (f_filtered, f_filtered, f'{i} // {j}', 'purple'),
+                #'5': (mod_filtered, mod_filtered, f'{i} % {j}', 'gray'),
             }
             
             for z in results:
@@ -165,11 +165,9 @@ def set_maths():
                         plt.scatter(x_val[:p_len], y_val[:p_len], label=lbl, color=clr, s=10)
                     plt.title(f'Set Maths: {i} & {j}')
                     plt.legend()
-                    plt.savefig(f'{i}{j}.png', format='png')
-                    if mode == '1':
-                        plt.show()
-                    else:
-                        plt.close()
+                    plt.savefig(f'/img/{i}{j}.png', format='png')
+                    plt.show()
+                    plt.close()
                     next_set += 1                  
                 else:
                     next_set += 1
