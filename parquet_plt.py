@@ -12,7 +12,7 @@ def cpp_plt(filename):
 
         if not data.empty:
             plt.plot(data.index, data.values, label=column,
-                     marker='o', linestyle='none', markersize=2)
+                     marker='o', linestyle='solid', markersize=2)
 
     plt.title("CPP_EXPORT")
     plt.xlabel("Index")
