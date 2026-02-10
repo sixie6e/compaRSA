@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import pyarrow.parquet as pq
 
 def cpp_plt(filename):
-    table = pq.read_table(filename)
+    table = pq.read_table(filename, thrift_string_size_limit=100*1024*1024, thrift_container_size_limit=100*1024*1024)
     df = table.to_pandas()
     
     print(f"File has {len(df.columns)} sets available.")
