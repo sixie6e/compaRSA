@@ -7,10 +7,10 @@ Manual mode: You decide. Slow with full control.\
 Auto mode: Computer decides. Rapid with no control.\
 The bin and parquet files get massive, make sure to have adequate storage.\
 Requirements: pyarrow, parquet, pandas, matplotlib\
-\
+
 1. Current AppImage:
     https://sourceforge.net/projects/thedirector/\
-\
+
 2.
     Download theDirector executable and parquet_plt.py, then:\ 
     sudo apt update\
